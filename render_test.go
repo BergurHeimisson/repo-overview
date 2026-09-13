@@ -176,3 +176,34 @@ func TestWindowLabelIsCompact(t *testing.T) {
 		}
 	}
 }
+
+func TestRenderShowsRootReadmeBannerBeforeModules(t *testing.T) {
+	r := plainReport()
+	r.RootReadme = Readme{
+		Lines:     []string{"# Jetlog", "Travel briefings."},
+		Truncated: true,
+		Total:     12,
+		URL:       "https://github.com/BergurHeimisson/jetlog/blob/develop/README.md",
+	}
+	out := render(r, Options{Lines: 2})
+
+	if !strings.Contains(out, "# Jetlog") || !strings.Contains(out, "blob/develop/README.md") {
+		t.Errorf("banner missing:\n%s", out)
+	}
+	if !strings.Contains(out, "… 10 more lines") {
+		t.Errorf("banner truncation notice missing:\n%s", out)
+	}
+	if strings.Index(out, "# Jetlog") > strings.Index(out, "● pipeline") {
+		t.Errorf("banner should come before the module list:\n%s", out)
+	}
+}
+
+func TestRenderOmitsRootBannerWhenAbsent(t *testing.T) {
+	out := render(plainReport(), Options{Lines: 2})
+	if strings.Contains(out, "README.md\n  │") && !strings.Contains(out, "pipeline") {
+		t.Errorf("unexpected banner:\n%s", out)
+	}
+	if strings.Count(out, "●") != 1 {
+		t.Errorf("expected exactly one module bullet:\n%s", out)
+	}
+}

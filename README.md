@@ -18,9 +18,11 @@ repo-overview --long --since 7d --lines 10 ~/code/jetlog
    `package.json`, `build.gradle`, `pyproject.toml`, `Cargo.toml`, `*.csproj`,
    …), ignoring vendored trees like `node_modules` and `target`. A repo with no
    manifests falls back to its top-level directories.
-4. Per module: the first 30 lines of `README.md`, a clickable GitHub blob URL,
+4. Shows the repository's own top-level `README.md` as a banner, when the root
+   is not itself a module.
+5. Per module: the first 30 lines of `README.md`, a clickable GitHub blob URL,
    and lines added/deleted plus commit count inside the window.
-5. Sorts by churn, so the busiest module is at the top.
+6. Sorts by churn, so the busiest module is at the top.
 
 Nested modules are charged to themselves, not to their parent.
 

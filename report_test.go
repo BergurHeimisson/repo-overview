@@ -122,3 +122,76 @@ func TestBuildReportWarnsWhenFetchFails(t *testing.T) {
 		t.Error("report should still be produced from local refs")
 	}
 }
+
+func TestBuildReportShowsRootReadmeWhenRootIsNotAModule(t *testing.T) {
+	f := busyRepo(t)
+	f.write("README.md", "# Jetlog\nThe whole thing.\nThird line.\n")
+	f.git("add", "-A")
+	f.commitAt("add root readme", time.Hour, "Bergur Heimisson")
+	f.git("branch", "-f", "develop", "HEAD")
+
+	rep, err := buildReport(f.dir, Options{Lines: 2, Window: 24 * time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.RootReadme.Lines) != 2 || rep.RootReadme.Lines[0] != "# Jetlog" {
+		t.Errorf("root readme lines = %v", rep.RootReadme.Lines)
+	}
+	if !rep.RootReadme.Truncated || rep.RootReadme.Total != 3 {
+		t.Errorf("truncated=%v total=%d want true/3", rep.RootReadme.Truncated, rep.RootReadme.Total)
+	}
+	if rep.RootReadme.URL != "README.md" {
+		t.Errorf("URL = %q want README.md", rep.RootReadme.URL)
+	}
+	for _, m := range rep.Modules {
+		if m.Module.Dir == "." {
+			t.Error("root should not also appear as a module")
+		}
+	}
+}
+
+func TestBuildReportUsesGitHubURLForRootReadme(t *testing.T) {
+	f := busyRepo(t)
+	f.write("README.md", "# Jetlog\n")
+	f.git("add", "-A")
+	f.commitAt("add root readme", time.Hour, "Bergur Heimisson")
+	f.git("branch", "-f", "develop", "HEAD")
+	f.git("remote", "add", "origin", "git@github.com:BergurHeimisson/jetlog.git")
+
+	rep, err := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "https://github.com/BergurHeimisson/jetlog/blob/develop/README.md"
+	if rep.RootReadme.URL != want {
+		t.Errorf("URL = %q want %q", rep.RootReadme.URL, want)
+	}
+}
+
+func TestBuildReportSkipsRootBannerWhenRootIsAModule(t *testing.T) {
+	f := newFixture(t)
+	f.write("go.mod", "module x\n")
+	f.write("README.md", "# Root module\n")
+	f.write("tools/go.mod", "module t\n")
+	f.git("add", "-A")
+	f.commitAt("init", time.Hour, "Test Person")
+
+	rep, err := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.RootReadme.Lines) != 0 {
+		t.Error("root is already a module; the banner would duplicate it")
+	}
+}
+
+func TestBuildReportHasNoRootBannerWithoutARootReadme(t *testing.T) {
+	f := busyRepo(t)
+	rep, err := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.RootReadme.Lines) != 0 || rep.RootReadme.URL != "" {
+		t.Errorf("unexpected root banner: %+v", rep.RootReadme)
+	}
+}

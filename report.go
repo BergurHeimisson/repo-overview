@@ -37,6 +37,7 @@ func buildReport(path string, o Options) (Report, error) {
 		return Report{}, err
 	}
 	mods := discoverModules(tree)
+	rep.RootReadme = rootReadme(root, ref, base, hasGitHub, mods, tree, o)
 
 	reports := make([]ModuleReport, len(mods))
 	errs := make([]error, len(mods))
@@ -63,6 +64,37 @@ func buildReport(path string, o Options) (Report, error) {
 	sortReports(reports)
 	rep.Modules = reports
 	return rep, nil
+}
+
+// rootReadme surfaces the repository's own README when the root is not itself
+// a module, so a docs-shaped repo still leads with its overview.
+func rootReadme(root string, ref Ref, base string, hasGitHub bool, mods []Module, tree []string, o Options) Readme {
+	for _, m := range mods {
+		if m.Dir == "." {
+			return Readme{}
+		}
+	}
+
+	path := ""
+	for _, p := range tree {
+		if strings.EqualFold(p, "README.md") {
+			path = p
+			break
+		}
+	}
+	if path == "" {
+		return Readme{}
+	}
+
+	lines, truncated, total, err := readLines(root, ref.Rev, path, o.Lines)
+	if err != nil {
+		return Readme{}
+	}
+	r := Readme{Lines: lines, Truncated: truncated, Total: total, URL: path}
+	if hasGitHub {
+		r.URL = blobURL(base, ref.Name, path)
+	}
+	return r
 }
 
 func collect(root string, ref Ref, base string, hasGitHub bool, m Module, o Options) (ModuleReport, error) {

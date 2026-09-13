@@ -29,13 +29,23 @@ type ModuleReport struct {
 	ReadmeTotal int
 }
 
-// Report is the whole run, ready to render.
+// Readme is an excerpt of a README.md as committed on the reported branch.
+type Readme struct {
+	Lines     []string
+	Truncated bool
+	Total     int
+	URL       string
+}
+
+// Report is the whole run, ready to render. RootReadme carries the repository's
+// top-level README when the root is not itself a module.
 type Report struct {
-	Repo     string
-	Ref      Ref
-	Window   time.Duration
-	Modules  []ModuleReport
-	Warnings []string
+	Repo       string
+	Ref        Ref
+	Window     time.Duration
+	RootReadme Readme
+	Modules    []ModuleReport
+	Warnings   []string
 }
 
 // A restrained 256-colour palette that stays legible on dark terminals.
@@ -115,6 +125,11 @@ func render(r Report, o Options) string {
 	}
 	b.WriteString("\n")
 
+	if len(r.RootReadme.Lines) > 0 {
+		renderReadme(&b, p, r.RootReadme)
+		b.WriteString("\n")
+	}
+
 	for _, m := range r.Modules {
 		renderModule(&b, p, m, o)
 	}
@@ -146,22 +161,16 @@ func renderModule(b *strings.Builder, p painter, m ModuleReport, o Options) {
 	b.WriteString(p.paint(ansiModule, "● "+name))
 	b.WriteString("  " + churnLabel(p, m.Churn) + "\n")
 
-	if m.URL != "" {
-		b.WriteString("  " + p.paint(ansiLink, m.URL) + "\n")
-	} else if m.Module.Readme == "" {
+	if m.Module.Readme == "" {
 		b.WriteString("  " + p.paint(ansiFaint, "(no README.md)") + "\n")
 	}
 
-	for _, line := range m.ReadmeLines {
-		b.WriteString(p.paint(ansiFaint, "  │ ") + p.paint(ansiBody, line) + "\n")
-	}
-	if m.Truncated {
-		if rest := m.ReadmeTotal - len(m.ReadmeLines); rest > 0 {
-			b.WriteString(p.paint(ansiFaint, fmt.Sprintf("  │ … %d more lines\n", rest)))
-		} else {
-			b.WriteString(p.paint(ansiFaint, "  │ … more lines\n"))
-		}
-	}
+	renderReadme(b, p, Readme{
+		Lines:     m.ReadmeLines,
+		Truncated: m.Truncated,
+		Total:     m.ReadmeTotal,
+		URL:       m.URL,
+	})
 
 	if o.Long && m.Last.Subject != "" {
 		age := ""
@@ -171,6 +180,22 @@ func renderModule(b *strings.Builder, p painter, m ModuleReport, o Options) {
 		b.WriteString("  " + p.paint(ansiMeta, "last: "+m.Last.Author+" — "+m.Last.Subject+age) + "\n")
 	}
 	b.WriteString("\n")
+}
+
+func renderReadme(b *strings.Builder, p painter, r Readme) {
+	if r.URL != "" {
+		b.WriteString("  " + p.paint(ansiLink, r.URL) + "\n")
+	}
+	for _, line := range r.Lines {
+		b.WriteString(p.paint(ansiFaint, "  │ ") + p.paint(ansiBody, line) + "\n")
+	}
+	if r.Truncated {
+		if rest := r.Total - len(r.Lines); rest > 0 {
+			b.WriteString(p.paint(ansiFaint, fmt.Sprintf("  │ … %d more lines\n", rest)))
+		} else {
+			b.WriteString(p.paint(ansiFaint, "  │ … more lines\n"))
+		}
+	}
 }
 
 func churnLabel(p painter, c Churn) string {
