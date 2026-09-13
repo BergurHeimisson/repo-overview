@@ -69,7 +69,7 @@ func plainReport() Report {
 
 func TestRenderShowsModuleChurnAndReadme(t *testing.T) {
 	out := render(plainReport(), Options{Lines: 30})
-	for _, want := range []string{"pipeline", "+412", "87", "6 commits", "# Pipeline", "blob/develop/pipeline/README.md"} {
+	for _, want := range []string{"pipeline", "+412", "87", "6 commits", "═══ Pipeline", "blob/develop/pipeline/README.md"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("output missing %q\n%s", want, out)
 		}
@@ -187,20 +187,20 @@ func TestRenderShowsRootReadmeBannerBeforeModules(t *testing.T) {
 	}
 	out := render(r, Options{Lines: 2})
 
-	if !strings.Contains(out, "# Jetlog") || !strings.Contains(out, "blob/develop/README.md") {
+	if !strings.Contains(out, "═══ Jetlog") || !strings.Contains(out, "blob/develop/README.md") {
 		t.Errorf("banner missing:\n%s", out)
 	}
 	if !strings.Contains(out, "… 10 more lines") {
 		t.Errorf("banner truncation notice missing:\n%s", out)
 	}
-	if strings.Index(out, "# Jetlog") > strings.Index(out, "● pipeline") {
+	if strings.Index(out, "═══ Jetlog") > strings.Index(out, "● pipeline") {
 		t.Errorf("banner should come before the module list:\n%s", out)
 	}
 }
 
 func TestRenderOmitsRootBannerWhenAbsent(t *testing.T) {
 	out := render(plainReport(), Options{Lines: 2})
-	if strings.Contains(out, "README.md\n  │") && !strings.Contains(out, "pipeline") {
+	if strings.Contains(out, "README.md\n  ═══") && !strings.Contains(out, "pipeline") {
 		t.Errorf("unexpected banner:\n%s", out)
 	}
 	if strings.Count(out, "●") != 1 {

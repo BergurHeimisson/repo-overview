@@ -20,8 +20,10 @@ repo-overview --long --since 7d --lines 10 ~/code/jetlog
    manifests falls back to its top-level directories.
 4. Shows the repository's own top-level `README.md` as a banner, when the root
    is not itself a module.
-5. Per module: the first 30 lines of `README.md`, a clickable GitHub blob URL,
-   and lines added/deleted plus commit count inside the window.
+5. Per module: the first 30 lines of `README.md` — rendered as markdown, with
+   headings, lists, code blocks, links and box-drawn tables, in the same
+   terminal style as `md-viewer` — a clickable GitHub blob URL, and lines
+   added/deleted plus commit count inside the window.
 6. Sorts by churn, so the busiest module is at the top.
 
 Nested modules are charged to themselves, not to their parent.

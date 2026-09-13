@@ -57,7 +57,6 @@ const (
 	ansiDel    = "\x1b[38;5;174m"
 	ansiMeta   = "\x1b[38;5;245m"
 	ansiFaint  = "\x1b[38;5;240m"
-	ansiBody   = "\x1b[38;5;250m"
 	ansiLink   = "\x1b[38;5;109m"
 	ansiWarn   = "\x1b[38;5;179m"
 )
@@ -186,14 +185,14 @@ func renderReadme(b *strings.Builder, p painter, r Readme) {
 	if r.URL != "" {
 		b.WriteString("  " + p.paint(ansiLink, r.URL) + "\n")
 	}
-	for _, line := range r.Lines {
-		b.WriteString(p.paint(ansiFaint, "  │ ") + p.paint(ansiBody, line) + "\n")
+	for _, line := range renderMarkdown(r.Lines, p) {
+		b.WriteString("  " + line + "\n")
 	}
 	if r.Truncated {
 		if rest := r.Total - len(r.Lines); rest > 0 {
-			b.WriteString(p.paint(ansiFaint, fmt.Sprintf("  │ … %d more lines\n", rest)))
+			b.WriteString(p.paint(ansiFaint, fmt.Sprintf("  … %d more lines\n", rest)))
 		} else {
-			b.WriteString(p.paint(ansiFaint, "  │ … more lines\n"))
+			b.WriteString(p.paint(ansiFaint, "  … more lines\n"))
 		}
 	}
 }
