@@ -6,7 +6,7 @@ READMEs say, and which ones actually moved in the last 24 hours.
 ```
 repo-overview                 # the repo containing the current directory
 repo-overview ~/code/jetlog   # an explicit path
-repo-overview --long --since 7d --lines 10 ~/code/jetlog
+repo-overview --short --since 7d --lines 10 ~/code/jetlog
 ```
 
 ## What it does
@@ -20,7 +20,8 @@ repo-overview --long --since 7d --lines 10 ~/code/jetlog
    manifests falls back to its top-level directories.
 4. Shows the repository's own top-level `README.md` as a banner, when the root
    is not itself a module.
-5. Per module: the first 30 lines of `README.md` — rendered as markdown, with
+5. Per module: the last commit (author and subject, hide with `--short`),
+   the first 30 lines of `README.md` — rendered as markdown, with
    headings, lists, code blocks, links and box-drawn tables, in the same
    terminal style as `md-viewer` — a clickable GitHub blob URL, and lines
    added/deleted plus commit count inside the window.
@@ -33,7 +34,7 @@ Nested modules are charged to themselves, not to their parent.
 | Flag | Default | Meaning |
 |---|---|---|
 | `--lines N` | 30 | README lines to show per module |
-| `--long` | off | also show the last committer and commit subject |
+| `--short` | off | omit the last committer and commit subject |
 | `--since D` | `24h` | churn window: `90m`, `24h`, `7d` |
 | `--branch B` | — | report on B instead of develop/main/master |
 | `--no-fetch` | off | skip the network, use local refs |

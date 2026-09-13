@@ -89,21 +89,21 @@ func TestBuildReportUsesGitHubURLWhenOriginIsGitHub(t *testing.T) {
 	}
 }
 
-func TestBuildReportCollectsLastCommitOnlyWhenLong(t *testing.T) {
+func TestBuildReportSkipsLastCommitWhenShort(t *testing.T) {
 	f := busyRepo(t)
 	short, _ := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour})
 	if short.Modules[0].Last.Subject != "" {
-		t.Error("last commit gathered without --long")
+		t.Error("last commit gathered with --short")
 	}
-	long, err := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour, Long: true})
+	full, err := buildReport(f.dir, Options{Lines: 30, Window: 24 * time.Hour, ShowCommit: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if long.Modules[0].Last.Author != "Bergur Heimisson" {
-		t.Errorf("author = %q", long.Modules[0].Last.Author)
+	if full.Modules[0].Last.Author != "Bergur Heimisson" {
+		t.Errorf("author = %q", full.Modules[0].Last.Author)
 	}
-	if !strings.Contains(long.Modules[0].Last.Subject, "extend the api") {
-		t.Errorf("subject = %q", long.Modules[0].Last.Subject)
+	if !strings.Contains(full.Modules[0].Last.Subject, "extend the api") {
+		t.Errorf("subject = %q", full.Modules[0].Last.Subject)
 	}
 }
 

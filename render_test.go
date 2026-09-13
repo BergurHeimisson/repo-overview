@@ -83,15 +83,15 @@ func TestRenderMarksTruncatedReadme(t *testing.T) {
 	}
 }
 
-func TestRenderHidesCommitDetailsWithoutLong(t *testing.T) {
+func TestRenderHidesCommitDetailsWithShort(t *testing.T) {
 	out := render(plainReport(), Options{Lines: 30})
 	if strings.Contains(out, "Bergur Heimisson") {
 		t.Errorf("author leaked into short output:\n%s", out)
 	}
 }
 
-func TestRenderShowsCommitDetailsWithLong(t *testing.T) {
-	out := render(plainReport(), Options{Lines: 30, Long: true})
+func TestRenderShowsCommitDetailsByDefault(t *testing.T) {
+	out := render(plainReport(), Options{Lines: 30, ShowCommit: true})
 	if !strings.Contains(out, "Bergur Heimisson") || !strings.Contains(out, "add PYMNTS feed") {
 		t.Errorf("expected author and subject:\n%s", out)
 	}
@@ -111,7 +111,7 @@ func TestRenderLabelsIdleModules(t *testing.T) {
 }
 
 func TestRenderEmitsNoAnsiWhenColorDisabled(t *testing.T) {
-	out := render(plainReport(), Options{Lines: 30, Long: true})
+	out := render(plainReport(), Options{Lines: 30, ShowCommit: true})
 	if strings.Contains(out, "\x1b[") {
 		t.Errorf("colour escapes present with colour disabled:\n%q", out)
 	}

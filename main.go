@@ -10,7 +10,7 @@ import (
 
 func main() {
 	lines := flag.Int("lines", 30, "README lines to show per module")
-	long := flag.Bool("long", false, "also show the last committer and commit subject")
+	short := flag.Bool("short", false, "omit the last committer and commit subject")
 	since := flag.String("since", "24h", "churn window, e.g. 24h, 90m, 7d")
 	branch := flag.String("branch", "", "report on this branch instead of develop/main/master")
 	noFetch := flag.Bool("no-fetch", false, "skip git fetch and use local refs")
@@ -38,12 +38,12 @@ func main() {
 	}
 
 	opts := Options{
-		Lines:  *lines,
-		Long:   *long,
-		Window: window,
-		Branch: *branch,
-		Fetch:  !*noFetch,
-		Color:  colorEnabled(*noColor),
+		Lines:      *lines,
+		ShowCommit: !*short,
+		Window:     window,
+		Branch:     *branch,
+		Fetch:      !*noFetch,
+		Color:      colorEnabled(*noColor),
 	}
 
 	rep, err := buildReport(path, opts)

@@ -10,12 +10,12 @@ import (
 
 // Options are the resolved command line settings for one run.
 type Options struct {
-	Lines  int
-	Long   bool
-	Window time.Duration
-	Color  bool
-	Fetch  bool
-	Branch string
+	Lines      int
+	ShowCommit bool
+	Window     time.Duration
+	Color      bool
+	Fetch      bool
+	Branch     string
 }
 
 // ModuleReport is everything gathered about a single module.
@@ -171,7 +171,7 @@ func renderModule(b *strings.Builder, p painter, m ModuleReport, o Options) {
 		URL:       m.URL,
 	})
 
-	if o.Long && m.Last.Subject != "" {
+	if o.ShowCommit && m.Last.Subject != "" {
 		age := ""
 		if !m.Last.When.IsZero() {
 			age = " (" + humanAge(time.Since(m.Last.When)) + ")"

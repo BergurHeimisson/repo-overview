@@ -119,7 +119,7 @@ func collect(root string, ref Ref, base string, hasGitHub bool, m Module, o Opti
 		}
 	}
 
-	if o.Long {
+	if o.ShowCommit {
 		last, err := lastCommit(root, ref.Rev, m)
 		if err != nil {
 			return mr, err
