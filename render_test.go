@@ -207,3 +207,10 @@ func TestRenderOmitsRootBannerWhenAbsent(t *testing.T) {
 		t.Errorf("expected exactly one module bullet:\n%s", out)
 	}
 }
+
+func TestRenderPaintsLastCommitOrange(t *testing.T) {
+	out := render(plainReport(), Options{Lines: 30, ShowCommit: true, Color: true})
+	if !strings.Contains(out, ansiCommit+"last: ") {
+		t.Errorf("expected the last-commit line in orange:\n%q", out)
+	}
+}

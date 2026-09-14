@@ -63,6 +63,7 @@ const (
 	ansiFaint  = "\x1b[38;5;240m"
 	ansiLink   = "\x1b[38;5;109m"
 	ansiWarn   = "\x1b[38;5;179m"
+	ansiCommit = "\x1b[38;5;208m"
 )
 
 type painter bool
@@ -183,7 +184,7 @@ func renderModule(b *strings.Builder, p painter, m ModuleReport, o Options) {
 		if !m.Last.When.IsZero() {
 			age = " (" + humanAge(time.Since(m.Last.When)) + ")"
 		}
-		b.WriteString("  " + p.paint(ansiMeta, "last: "+m.Last.Author+" — "+m.Last.Subject+age) + "\n")
+		b.WriteString("  " + p.paint(ansiCommit, "last: "+m.Last.Author+" — "+m.Last.Subject+age) + "\n")
 	}
 	b.WriteString("\n")
 }
