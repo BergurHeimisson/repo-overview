@@ -61,6 +61,17 @@ func buildReport(path string, o Options) (Report, error) {
 		}
 	}
 
+	if o.SkipStale {
+		kept := reports[:0]
+		for _, r := range reports {
+			if r.Churn.Commits > 0 {
+				kept = append(kept, r)
+			}
+		}
+		rep.Skipped = len(reports) - len(kept)
+		reports = kept
+	}
+
 	sortReports(reports)
 	rep.Modules = reports
 	return rep, nil

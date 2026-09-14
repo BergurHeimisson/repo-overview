@@ -15,6 +15,8 @@ type Options struct {
 	Window     time.Duration
 	Color      bool
 	Fetch      bool
+	Page       bool
+	SkipStale  bool
 	Branch     string
 }
 
@@ -38,13 +40,15 @@ type Readme struct {
 }
 
 // Report is the whole run, ready to render. RootReadme carries the repository's
-// top-level README when the root is not itself a module.
+// top-level README when the root is not itself a module, and Skipped counts the
+// modules --skip-stale left out.
 type Report struct {
 	Repo       string
 	Ref        Ref
 	Window     time.Duration
 	RootReadme Readme
 	Modules    []ModuleReport
+	Skipped    int
 	Warnings   []string
 }
 
@@ -117,6 +121,9 @@ func render(r Report, o Options) string {
 	}
 	b.WriteString("  " + p.paint(ansiMeta, fmt.Sprintf(
 		"branch %s · %d modules · churn over %s", r.Ref.Name, len(r.Modules), windowLabel(r.Window))))
+	if r.Skipped > 0 {
+		b.WriteString(p.paint(ansiFaint, fmt.Sprintf(" · %d stale hidden", r.Skipped)))
+	}
 	b.WriteString("\n")
 
 	for _, w := range r.Warnings {

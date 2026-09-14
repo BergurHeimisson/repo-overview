@@ -195,3 +195,20 @@ func TestBuildReportHasNoRootBannerWithoutARootReadme(t *testing.T) {
 		t.Errorf("unexpected root banner: %+v", rep.RootReadme)
 	}
 }
+
+func TestBuildReportSkipsStaleModules(t *testing.T) {
+	f := busyRepo(t)
+	rep, err := buildReport(f.dir, Options{Lines: 1, Window: 24 * time.Hour, SkipStale: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rep.Modules) != 1 {
+		t.Fatalf("got %d modules want 1", len(rep.Modules))
+	}
+	if rep.Modules[0].Module.Dir != "api" {
+		t.Errorf("kept %q want api", rep.Modules[0].Module.Dir)
+	}
+	if rep.Skipped != 1 {
+		t.Errorf("Skipped = %d want 1", rep.Skipped)
+	}
+}
